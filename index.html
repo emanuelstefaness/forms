@@ -1,0 +1,615 @@
+<title>Formulário — Trabalho Acadêmico</title>
+<style>
+  :root {
+    --paper:      #faf6ef;
+    --paper-2:    #f1e9dc;
+    --card:       #fdfaf4;
+    --ink:        #3a2a2f;
+    --ink-soft:   #8c7a80;
+    --wine:       #8c2f4a;
+    --wine-deep:  #6e2138;
+    --rose:       #c58598;
+    --gold:       #b48a4e;
+    --gold-soft:  #d8b985;
+    --line:       rgba(110, 55, 75, .16);
+    --line-soft:  rgba(110, 55, 75, .09);
+    --serif: "Hoefler Text", "Baskerville", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --radius: 22px;
+    --shadow: 0 2px 4px rgba(58,30,42,.04), 0 18px 40px -20px rgba(110,40,65,.28), 0 40px 80px -50px rgba(110,40,65,.4);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    background: var(--paper);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 18px;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  /* ambient warmth + fine grain */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(120% 90% at 12% 8%, rgba(226,178,190,.5), transparent 55%),
+      radial-gradient(110% 80% at 92% 100%, rgba(214,182,142,.34), transparent 55%),
+      radial-gradient(90% 70% at 100% 0%, rgba(180,120,140,.18), transparent 60%);
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: .5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+
+  .serif { font-family: var(--serif); }
+
+  /* ============ DISGUISE ============ */
+  #disguise {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 600px;
+    background: #fff;
+    border: 1px solid #e7e7ea;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(60,64,67,.1), 0 10px 30px rgba(60,64,67,.08);
+    overflow: hidden;
+    color: #3c4043;
+  }
+  #disguise .band { height: 8px; background: linear-gradient(90deg,#5b3fa8,#7e5bd0); }
+  #disguise .body { padding: 26px 28px 28px; }
+  #disguise h1 { font-size: 23px; font-weight: 600; margin: 2px 0 8px; color: #202124; letter-spacing: -.2px; }
+  #disguise .desc { font-size: 13.5px; color: #5f6368; margin: 0; line-height: 1.55; }
+  #disguise .req { color: #c5221f; font-size: 12.5px; margin: 16px 0 20px; }
+  #disguise .q { border: 1px solid #dadce0; border-radius: 10px; padding: 18px 20px; margin-bottom: 14px; }
+  #disguise .q label { display: block; font-size: 14.5px; color: #202124; margin-bottom: 14px; font-weight: 500; }
+  #disguise .q .star { color: #c5221f; }
+  #disguise .opt { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #3c4043; margin: 11px 0; }
+  #disguise .radio { width: 18px; height: 18px; border: 2px solid #5f6368; border-radius: 50%; flex: none; }
+  #disguise .fakeinput { border-bottom: 1px solid #dadce0; height: 28px; width: 65%; }
+  #disguise .loading { text-align: center; color: #5f6368; font-size: 12.5px; padding: 10px 0 2px; }
+  #disguise .dots::after { content: ""; animation: dots 1.2s steps(4,end) infinite; }
+  @keyframes dots { 0%{content:""} 25%{content:"."} 50%{content:".."} 75%{content:"..."} 100%{content:""} }
+
+  /* ============ APP ============ */
+  #app { display: none; position: relative; z-index: 1; width: 100%; max-width: 430px; }
+  #app.show { display: block; }
+
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,.6);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 46px 34px 38px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .card::before { /* top sheen */
+    content: "";
+    position: absolute; left: 0; right: 0; top: 0; height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,.7), transparent);
+    pointer-events: none;
+  }
+  .card > * { position: relative; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: rise .55s cubic-bezier(.22,.9,.3,1); }
+  @keyframes rise { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
+
+  /* eyebrow */
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .eyebrow::before, .eyebrow::after {
+    content: "";
+    width: 26px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
+  }
+
+  /* ornamental rule */
+  .rule {
+    display: flex; align-items: center; justify-content: center; gap: 14px;
+    color: var(--gold);
+    margin: 26px 0 22px;
+  }
+  .rule::before, .rule::after {
+    content: ""; height: 1px; width: 64px;
+    background: linear-gradient(90deg, transparent, var(--line));
+  }
+  .rule::after { background: linear-gradient(90deg, var(--line), transparent); }
+  .rule svg { width: 15px; height: 15px; display: block; opacity: .8; }
+
+  .display {
+    font-family: var(--serif);
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.08;
+    letter-spacing: -.5px;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .s1-title { font-size: clamp(31px, 8.6vw, 40px); }
+  .s1-title em { font-style: italic; color: var(--wine); }
+  .lede {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-style: italic;
+    color: var(--ink-soft);
+    margin: 16px auto 0;
+    max-width: 30ch;
+    line-height: 1.5;
+  }
+
+  /* buttons */
+  .btn {
+    -webkit-tap-highlight-color: transparent;
+    appearance: none;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    color: #fdf4f0;
+    background: linear-gradient(180deg, #a03955, var(--wine-deep));
+    border: 1px solid var(--wine-deep);
+    padding: 16px 22px;
+    border-radius: 15px;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 12px 24px -12px rgba(110,33,56,.75);
+    transition: transform .14s ease, box-shadow .22s ease, opacity .2s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 18px 30px -14px rgba(110,33,56,.8); }
+  .btn:active { transform: translateY(0) scale(.99); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn.mt { margin-top: 30px; }
+
+  /* evasive ghost buttons */
+  .ghost {
+    position: relative;
+    display: inline-block;
+    margin-top: 16px;
+    padding: 11px 26px;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: left .16s ease, top .16s ease;
+    z-index: 6;
+  }
+  .ghost.flee { position: fixed; margin: 0; }
+
+  /* ============ calendar ============ */
+  .label {
+    font-family: var(--sans);
+    text-align: left;
+    font-size: 10.5px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin: 26px 2px 10px;
+  }
+  .cal {
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    border-radius: 16px;
+    padding: 16px 14px;
+    box-shadow: 0 8px 20px -16px rgba(110,40,65,.4);
+  }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-head .m { font-family: var(--serif); font-size: 18px; color: var(--ink); letter-spacing: .2px; }
+  .cal-nav {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--wine);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 16px; line-height: 1;
+    cursor: pointer;
+    transition: background .14s, color .14s, opacity .2s;
+  }
+  .cal-nav:hover:not(:disabled) { background: var(--wine); color: #fff; }
+  .cal-nav:disabled { opacity: .25; cursor: default; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+  .dow { font-family: var(--sans); font-size: 10.5px; color: var(--rose); font-weight: 600; letter-spacing: .04em; padding: 4px 0 8px; }
+  .day {
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--sans);
+    font-size: 14px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--ink);
+    transition: background .12s, color .12s, transform .12s;
+  }
+  .day.empty, .day.disabled { color: #cdbcc2; cursor: default; }
+  .day:not(.empty):not(.disabled):hover { background: var(--paper-2); }
+  .day.sel { background: var(--wine); color: #fff; font-weight: 600; box-shadow: 0 6px 12px -6px rgba(110,33,56,.7); }
+
+  .times { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+  .time {
+    font-family: var(--sans);
+    padding: 11px 4px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: all .13s;
+  }
+  .time:hover { border-color: var(--rose); }
+  .time.sel { background: var(--wine); color: #fff; border-color: var(--wine); }
+
+  /* ============ food ============ */
+  .foods { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+  .food {
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    border-radius: 16px;
+    padding: 22px 12px 18px;
+    cursor: pointer;
+    transition: transform .15s, border-color .15s, box-shadow .15s;
+  }
+  .food .tile {
+    width: 58px; height: 58px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--paper-2);
+    border-radius: 50%;
+    font-size: 30px;
+  }
+  .food .name { margin-top: 13px; font-family: var(--serif); font-size: 17px; color: var(--ink); }
+  .food:hover { transform: translateY(-3px); border-color: var(--rose); box-shadow: 0 14px 26px -18px rgba(110,40,65,.5); }
+  .food.sel { border-color: var(--wine); box-shadow: 0 14px 28px -16px rgba(110,33,56,.55); }
+  .food.sel .tile { background: #f6e2e8; }
+  .food.wide { grid-column: 1 / -1; }
+  .food.wide .tile { }
+
+  /* ============ YAY ============ */
+  .s4-title { font-size: clamp(34px, 9vw, 44px); font-style: italic; color: var(--wine); }
+  .summary {
+    background: #fff;
+    border: 1px solid var(--line-soft);
+    border-radius: 16px;
+    padding: 6px 24px;
+    text-align: left;
+    box-shadow: 0 10px 24px -18px rgba(110,40,65,.5);
+  }
+  .summary .row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .summary .row:last-child { border-bottom: none; }
+  .summary .k { font-family: var(--sans); font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+  .summary .v { font-family: var(--serif); font-size: 17px; color: var(--ink); text-align: right; }
+  .closing { font-family: var(--serif); font-style: italic; font-size: 19px; color: var(--wine); margin: 26px 0 4px; line-height: 1.4; }
+  .footnote { font-family: var(--serif); font-style: italic; font-size: 12.5px; color: var(--ink-soft); line-height: 1.55; margin: 14px auto 0; max-width: 32ch; }
+
+  /* rain */
+  .rain { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 55; }
+  .drop {
+    position: absolute; top: -12%;
+    width: 1.5px;
+    background: linear-gradient(transparent, rgba(120,140,170,.55));
+    border-radius: 2px;
+    animation: drop linear forwards;
+  }
+  @keyframes drop { to { transform: translateY(122vh); } }
+
+  /* petals */
+  .petals { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 60; }
+  .petal { position: absolute; top: -24px; animation: fall linear forwards; opacity: .9; }
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0); opacity: 0; }
+    12% { opacity: .95; }
+    100% { transform: translateY(112vh) rotate(540deg); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen.active, .petal, .drop, .dots::after { animation: none; }
+  }
+</style>
+
+<!-- ===================== DISGUISE ===================== -->
+<div id="disguise" role="document" aria-label="Formulário acadêmico">
+  <div class="band"></div>
+  <div class="body">
+    <h1>Formulário de Pesquisa Acadêmica</h1>
+    <p class="desc">Trabalho da disciplina de Metodologia Científica. Sua colaboração respondendo às questões abaixo é muito importante. Tempo estimado: 3 minutos.</p>
+    <p class="req">* Indica uma pergunta obrigatória</p>
+
+    <div class="q">
+      <label>1. Qual seu nível de escolaridade? <span class="star">*</span></label>
+      <div class="opt"><span class="radio"></span> Ensino Médio</div>
+      <div class="opt"><span class="radio"></span> Ensino Superior incompleto</div>
+      <div class="opt"><span class="radio"></span> Ensino Superior completo</div>
+    </div>
+
+    <div class="q">
+      <label>2. Com que frequência você utiliza a internet para estudos? <span class="star">*</span></label>
+      <div class="opt"><span class="radio"></span> Diariamente</div>
+      <div class="opt"><span class="radio"></span> Algumas vezes por semana</div>
+      <div class="opt"><span class="radio"></span> Raramente</div>
+    </div>
+
+    <div class="q">
+      <label>3. Deixe um comentário sobre o tema abordado:</label>
+      <div class="fakeinput"></div>
+    </div>
+
+    <p class="loading">Carregando questões restantes<span class="dots"></span></p>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+  <div class="card">
+
+    <!-- SCREEN 1 -->
+    <section class="screen active" id="s1">
+      <span class="eyebrow">Um convite</span>
+      <h1 class="display s1-title">Você aceita ir<br>em um <em>date</em><br>comigo?</h1>
+      <div class="rule" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.9-9.7-9.1C.8 8.9 2.4 6 5.3 6c1.9 0 3.2 1.1 3.9 2.3C9.9 7.1 11.2 6 13.1 6c2.9 0 4.5 2.9 3 5.9C13.9 16.1 12 21 12 21z"/></svg>
+      </div>
+      <button class="btn" id="yesBtn">Sim, eu aceito</button>
+      <div><button class="ghost" id="noBtn" aria-label="Não">Não</button></div>
+    </section>
+
+    <!-- SCREEN 2 -->
+    <section class="screen" id="s2">
+      <span class="eyebrow">Data & hora</span>
+      <h2 class="display" style="font-size:clamp(27px,7.4vw,33px)">Quando você<br>está <em style="font-style:italic;color:var(--wine)">livre?</em></h2>
+      <div class="label">Escolha o dia</div>
+      <div class="cal" id="cal"></div>
+      <div class="label">Escolha o horário</div>
+      <div class="times" id="times"></div>
+      <button class="btn mt" id="setDate" disabled>Marcar o encontro</button>
+      <div><button class="ghost" id="neverBtn" aria-label="Nunca">Nunca</button></div>
+    </section>
+
+    <!-- SCREEN 3 -->
+    <section class="screen" id="s3">
+      <span class="eyebrow">O programa</span>
+      <h2 class="display" style="font-size:clamp(27px,7.4vw,33px)">O que a gente<br>vai <em style="font-style:italic;color:var(--wine)">fazer?</em></h2>
+      <p class="lede">Escolhe o clima do nosso encontro.</p>
+      <div class="rule" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.9-9.7-9.1C.8 8.9 2.4 6 5.3 6c1.9 0 3.2 1.1 3.9 2.3C9.9 7.1 11.2 6 13.1 6c2.9 0 4.5 2.9 3 5.9C13.9 16.1 12 21 12 21z"/></svg>
+      </div>
+      <div class="foods" id="foods">
+        <div class="food" data-food="Japa"><div class="tile">🍣</div><div class="name">Japa</div></div>
+        <div class="food" data-food="Hambúrguer"><div class="tile">🍔</div><div class="name">Hambúrguer</div></div>
+        <div class="food wide" data-food="Barzinho"><div class="tile">🍻</div><div class="name">Barzinho</div></div>
+      </div>
+      <button class="btn mt" id="foodNext" disabled>Continuar</button>
+    </section>
+
+    <!-- SCREEN 4 -->
+    <section class="screen" id="s4">
+      <span class="eyebrow">Está marcado</span>
+      <div class="rule" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.9-9.7-9.1C.8 8.9 2.4 6 5.3 6c1.9 0 3.2 1.1 3.9 2.3C9.9 7.1 11.2 6 13.1 6c2.9 0 4.5 2.9 3 5.9C13.9 16.1 12 21 12 21z"/></svg>
+      </div>
+      <div class="summary">
+        <div class="row"><span class="k">Dia</span><span class="v" id="sumDate">—</span></div>
+        <div class="row"><span class="k">Horário</span><span class="v" id="sumTime">—</span></div>
+        <div class="row"><span class="k">Programa</span><span class="v" id="sumFood">—</span></div>
+      </div>
+      <p class="closing">E dessa vez não vai chover — prometo.</p>
+      <p class="footnote">Um cara normal mandaria uma mensagem. Eu fiz um site inteiro para você — não sou como os outros.</p>
+    </section>
+
+  </div>
+</div>
+
+<div class="rain" id="rain" aria-hidden="true"></div>
+<div class="petals" id="petals" aria-hidden="true"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var disguise = document.getElementById("disguise");
+  var app = document.getElementById("app");
+  setTimeout(function () {
+    disguise.style.transition = "opacity .55s ease, transform .55s ease, filter .55s ease";
+    disguise.style.opacity = "0";
+    disguise.style.transform = "scale(.97)";
+    disguise.style.filter = "blur(3px)";
+    setTimeout(function () {
+      disguise.style.display = "none";
+      app.classList.add("show");
+      document.title = "Um convite especial";
+    }, 520);
+  }, 2000);
+
+  function goto(id) {
+    document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
+    document.getElementById(id).classList.add("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* evasive buttons */
+  function makeRunaway(btn) {
+    function flee() {
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var w = btn.offsetWidth, h = btn.offsetHeight, pad = 14;
+      var x = pad + Math.random() * (vw - w - pad * 2);
+      var y = pad + Math.random() * (vh - h - pad * 2);
+      if (!btn.classList.contains("flee")) btn.classList.add("flee");
+      btn.style.left = x + "px";
+      btn.style.top = y + "px";
+    }
+    btn.addEventListener("mouseenter", flee);
+    btn.addEventListener("mouseover", flee);
+    btn.addEventListener("touchstart", function (e) { e.preventDefault(); flee(); }, { passive: false });
+    btn.addEventListener("pointerdown", function (e) { e.preventDefault(); flee(); });
+    btn.addEventListener("click", function (e) { e.preventDefault(); flee(); });
+    document.addEventListener("pointermove", function (e) {
+      if (!btn.offsetParent && !btn.classList.contains("flee")) return;
+      var r = btn.getBoundingClientRect();
+      var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      if (Math.hypot(e.clientX - cx, e.clientY - cy) < 95) flee();
+    });
+  }
+  makeRunaway(document.getElementById("noBtn"));
+  makeRunaway(document.getElementById("neverBtn"));
+
+  document.getElementById("yesBtn").addEventListener("click", function () { burst(); goto("s2"); });
+
+  /* calendar */
+  var MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  var DOW = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  var DOW_FULL = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var viewY = today.getFullYear(), viewM = today.getMonth();
+  var selectedDate = null, selectedTime = null, selectedFood = null;
+  var calEl = document.getElementById("cal");
+
+  function renderCal() {
+    var first = new Date(viewY, viewM, 1).getDay();
+    var days = new Date(viewY, viewM + 1, 0).getDate();
+    var html = '<div class="cal-head"><button class="cal-nav" id="prevM">‹</button>';
+    html += '<span class="m">' + MONTHS[viewM] + " " + viewY + '</span>';
+    html += '<button class="cal-nav" id="nextM">›</button></div><div class="cal-grid">';
+    DOW.forEach(function (d) { html += '<div class="dow">' + d + '</div>'; });
+    for (var i = 0; i < first; i++) html += '<div class="day empty"></div>';
+    for (var d = 1; d <= days; d++) {
+      var dt = new Date(viewY, viewM, d);
+      var disabled = dt < today;
+      var sel = selectedDate && dt.getTime() === selectedDate.getTime();
+      html += '<div class="day' + (disabled ? ' disabled' : '') + (sel ? ' sel' : '') + '" data-d="' + d + '">' + d + '</div>';
+    }
+    html += '</div>';
+    calEl.innerHTML = html;
+
+    var prev = document.getElementById("prevM");
+    prev.disabled = (viewY === today.getFullYear() && viewM === today.getMonth());
+    prev.addEventListener("click", function () {
+      if (prev.disabled) return;
+      viewM--; if (viewM < 0) { viewM = 11; viewY--; } renderCal();
+    });
+    document.getElementById("nextM").addEventListener("click", function () {
+      viewM++; if (viewM > 11) { viewM = 0; viewY++; } renderCal();
+    });
+    calEl.querySelectorAll(".day:not(.empty):not(.disabled)").forEach(function (el) {
+      el.addEventListener("click", function () {
+        selectedDate = new Date(viewY, viewM, parseInt(el.dataset.d, 10));
+        selectedDate.setHours(0,0,0,0);
+        renderCal(); checkReady();
+      });
+    });
+  }
+  renderCal();
+
+  var TIMES = ["12:00","13:00","14:00","15:00","16:00","17:00","18:00","18:30","19:00","19:30","20:00","20:30"];
+  var timesEl = document.getElementById("times");
+  TIMES.forEach(function (t) {
+    var b = document.createElement("button");
+    b.className = "time"; b.textContent = t;
+    b.addEventListener("click", function () {
+      timesEl.querySelectorAll(".time").forEach(function (x) { x.classList.remove("sel"); });
+      b.classList.add("sel"); selectedTime = t; checkReady();
+    });
+    timesEl.appendChild(b);
+  });
+
+  var setDateBtn = document.getElementById("setDate");
+  function checkReady() { setDateBtn.disabled = !(selectedDate && selectedTime); }
+  setDateBtn.addEventListener("click", function () { burst(); goto("s3"); });
+
+  var foodNext = document.getElementById("foodNext");
+  document.querySelectorAll(".food").forEach(function (f) {
+    f.addEventListener("click", function () {
+      document.querySelectorAll(".food").forEach(function (x) { x.classList.remove("sel"); });
+      f.classList.add("sel"); selectedFood = f.dataset.food; foodNext.disabled = false;
+    });
+  });
+  foodNext.addEventListener("click", function () {
+    var d = selectedDate;
+    document.getElementById("sumDate").textContent = DOW_FULL[d.getDay()] + ", " + d.getDate() + " de " + MONTHS[d.getMonth()];
+    document.getElementById("sumTime").textContent = selectedTime;
+    document.getElementById("sumFood").textContent = selectedFood;
+    goto("s4"); startRain();
+  });
+
+  /* petals */
+  var box = document.getElementById("petals");
+  var COLORS = ["#c58598","#8c2f4a","#d8b985","#e2b2be","#b48a4e"];
+  function petal(x, delay) {
+    var p = document.createElement("div");
+    p.className = "petal";
+    var s = 8 + Math.random() * 8;
+    p.innerHTML = '<svg width="'+ (s*1.4) +'" height="'+ s +'" viewBox="0 0 28 20"><path d="M14 20C6 14 0 9 3 4c2-3 6-2 8 1 2-3 6-4 8-1 3 5-3 10-5 16z" fill="'+ COLORS[Math.floor(Math.random()*COLORS.length)] +'"/></svg>';
+    p.style.left = x + "px";
+    p.style.animationDuration = (3 + Math.random() * 2.2) + "s";
+    p.style.animationDelay = delay + "ms";
+    box.appendChild(p);
+    setTimeout(function () { p.remove(); }, 6000 + delay);
+  }
+  function burst() { for (var i = 0; i < 14; i++) petal(Math.random() * window.innerWidth, Math.random() * 400); }
+  function bigBurst() { for (var i = 0; i < 44; i++) petal(Math.random() * window.innerWidth, Math.random() * 1400); }
+
+  /* rain that falls, then clears — "dessa vez não vai chover" */
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function startRain() {
+    if (reduce) { bigBurst(); return; }
+    var rain = document.getElementById("rain");
+    var end = Date.now() + 2600;   // rain duration
+    (function spawn() {
+      var remaining = end - Date.now();
+      if (remaining <= 0) { setTimeout(bigBurst, 250); return; }  // sun after the rain
+      var thinning = Math.max(1, Math.round(3 * remaining / 2600)); // eases off toward the end
+      for (var i = 0; i < thinning; i++) {
+        var d = document.createElement("div");
+        d.className = "drop";
+        var dur = 0.45 + Math.random() * 0.45;
+        d.style.left = (Math.random() * 100) + "vw";
+        d.style.height = (36 + Math.random() * 44) + "px";
+        d.style.opacity = 0.3 + Math.random() * 0.4;
+        d.style.animationDuration = dur + "s";
+        rain.appendChild(d);
+        (function (el, t) { setTimeout(function () { el.remove(); }, t * 1000 + 120); })(d, dur);
+      }
+      setTimeout(spawn, 55);
+    })();
+  }
+})();
+</script>
