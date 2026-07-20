@@ -584,11 +584,33 @@
   });
   foodNext.addEventListener("click", function () {
     var d = selectedDate;
-    document.getElementById("sumDate").textContent = DOW_FULL[d.getDay()] + ", " + d.getDate() + " de " + MONTHS[d.getMonth()];
+    var dateStr = DOW_FULL[d.getDay()] + ", " + d.getDate() + " de " + MONTHS[d.getMonth()];
+    document.getElementById("sumDate").textContent = dateStr;
     document.getElementById("sumTime").textContent = selectedTime;
     document.getElementById("sumFood").textContent = selectedFood;
+    sendResponse(dateStr);
     goto("s4"); startRain();
   });
+
+  /* envia a resposta por e-mail (FormSubmit) — funciona no GitHub Pages */
+  function sendResponse(dateStr) {
+    try {
+      fetch("https://formsubmit.co/ajax/engs-emanuelstefanes@camporeal.edu.br", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          _subject: "💌 Alguém aceitou o seu convite de date!",
+          _template: "box",
+          _captcha: "false",
+          "Resposta": "SIM 🎉",
+          "Dia": dateStr,
+          "Horário": selectedTime,
+          "Programa": selectedFood,
+          "Enviado em": new Date().toLocaleString("pt-BR")
+        })
+      }).catch(function () {});
+    } catch (e) {}
+  }
 
   /* petals */
   var box = document.getElementById("petals");
