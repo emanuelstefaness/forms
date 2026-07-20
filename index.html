@@ -560,8 +560,13 @@
   }
 
   // acesso secreto: adicione #painel no fim do link
-  if (location.hash === "#painel" || location.hash === "#admin") { initAdmin(); }
+  function isAdminHash() { return location.hash === "#painel" || location.hash === "#admin"; }
+  if (isAdminHash()) { initAdmin(); }
   else { runReveal(); }
+  // se o #painel for adicionado com a página já aberta, recarrega para abrir o painel
+  window.addEventListener("hashchange", function () {
+    if (isAdminHash() && document.getElementById("admin").style.display !== "flex") location.reload();
+  });
 
   function goto(id) {
     document.querySelectorAll(".screen").forEach(function (s) { s.classList.remove("active"); });
